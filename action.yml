@@ -5,14 +5,35 @@ on:
     branches:
       - master
 
+inputs:
+  project:
+    description: "The GCP project used for Google Container Registry and Google Cloud Run"
+    required: true
+  serviceAccountEmail:
+    description: "The email address of the service account used to run this action"
+    required: true
+  region:
+    description: "The region the Google Cloud Run Service is hosted in"
+    required: true
+  serviceAccountKey:
+    description: "A based64 encode version of the JSON key for the service account"
+    required: true
+  image:
+    description: "The name of the docker image"
+    required: true
+  service:
+    description: "The name of the Google Cloud Run service"
+    required: true
+
 # Environment variables available to all jobs and steps in this workflow
 env:
-  GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
-  GCP_EMAIL: ${{ secrets.GCP_EMAIL }}
-  GCP_REGION: ${{ secrets.GCP_REGION }}
+  GCP_PROJECT: $INPUT_PROJECT
+  GCP_EMAIL: $INPUT_SERVICEACCOUNTEMAIL
+  GCP_REGION: $INPUT_REGION
+  GCP_KEY: $INPUT_SERVICEACCOUNTKEY
   GITHUB_SHA: ${{ github.sha }}
-  IMAGE: [image name]
-  SERVICE: [service name]
+  IMAGE: $INPUT_IMAGE
+  SERVICE: $INPUT_SERVICE
 
 jobs:
   setup-build-publish-deploy:
@@ -26,8 +47,8 @@ jobs:
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           version: "276.0.0"
-          service_account_email: ${{ secrets.GCP_EMAIL }}
-          service_account_key: ${{ secrets.GCP_KEY }}
+          service_account_email: $GCP_EMAIL
+          service_account_key: $GCP_KEY
 
       # Set the gcloud project (required for `gcloud run deploy`)
       - run: |
